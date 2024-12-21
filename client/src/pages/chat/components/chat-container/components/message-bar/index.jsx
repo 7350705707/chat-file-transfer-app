@@ -8,6 +8,7 @@ import React,{useRef} from "react";
 import { GrAttachment } from "react-icons/gr";
 import { IoSend } from "react-icons/io5";
 import { RiEmojiStickerLine } from "react-icons/ri";
+import { toast } from "sonner";
 
 const MessageBar = () => {
   const socket = useSocket();
@@ -38,27 +39,40 @@ const MessageBar = () => {
   }
 
   const handleSendMessage = async () => {
-    if(selectedChatType === "contact"){
+    if (message){
+      if(selectedChatType === "contact"){
       
-      socket.emit("sendMessage", {
-        sender: userInfo.id,
-        recipient: selectedChatData._id,
-        content: message,
-        messageType: "text",
-        fileUrl:undefined,
-    });
-    }else if(selectedChatType === "channel"){
-      socket.emit("send-channel-message", {
-        sender: userInfo.id,
-        content: message,
-        messageType: "text",
-        fileUrl:undefined,
-        channelId:selectedChatData._id,
-    });
+        socket.emit("sendMessage", {
+          sender: userInfo.id,
+          recipient: selectedChatData._id,
+          content: message,
+          messageType: "text",
+          fileUrl:undefined,
+      });
+      }else if(selectedChatType === "channel"){
+        socket.emit("send-channel-message", {
+          sender: userInfo.id,
+          content: message,
+          messageType: "text",
+          fileUrl:undefined,
+          channelId:selectedChatData._id,
+      });
+      }
+      setMessage("");
+    }else{
+      toast.error("Message cannot be empty");
     }
-    setMessage("");
+    
   };
 
+  const handleKeyPress = (event) => {
+    if (event.key === "Enter") {
+      handleSendMessage();
+    }
+  };
+
+
+  
   const handleAttachementClick = () => {
       if(fileInputRef.current){
           fileInputRef.current.click();
@@ -67,50 +81,71 @@ const MessageBar = () => {
   }
 
   const handleAttachementChange = async (e) => {
-        try{
-              const file = e.target.files[0];
-              if (file) {
-                const formData = new FormData();
-                formData.append("file", file);
-                setIsUploading(true);
-                const response = await apiClient.post(UPLOAD_FILE_ROUTE, formData, {
-                withCredentials: true,
-                onUploadProgress: (progressEvent) => {
-                    setFileUploadProgress(Math.round((progressEvent.loaded * 100) / progressEvent.total));
-                }
-                },
-                {
-                headers: {
-                    "Content-Type": "multipart/form-data",
-                },
-                });
+    try {
+      const file = e.target.files[0];
+      if (file) {
+        const formData = new FormData();
+        formData.append("file", file);
+        setIsUploading(true);
 
-                if (response.status === 200 && response.data.filePath) {
-                  setIsUploading(false);
-                      if(selectedChatType === "contact"){
-                    socket.emit("sendMessage", {
-                        sender: userInfo.id,
-                        recipient: selectedChatData._id,
-                        content: undefined,
-                        messageType: "file",
-                        fileUrl: response.data.filePath,
-                    });
-                  }else if(selectedChatType === "channel"){
-                    socket.emit("send-channel-message", {
-                      sender: userInfo.id,
-                      content: undefined,
-                      messageType: "file",
-                      fileUrl: response.data.filePath,
-                      channelId:selectedChatData._id,
-                  });
-                  }
-                }
-              }
-        }catch(error){
+        const response = await apiClient.post(UPLOAD_FILE_ROUTE, formData, {
+          withCredentials: true,
+          onUploadProgress: (progressEvent) => {
+            setFileUploadProgress(Math.round((progressEvent.loaded * 100) / progressEvent.total));
+          }
+        }, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
+
+        if (response.status === 200 && response.data.filePath) {
           setIsUploading(false);
-            console.log(error);
+          if (selectedChatType === "contact") {
+            socket.emit("sendMessage", {
+              sender: userInfo.id,
+              recipient: selectedChatData._id,
+              content: undefined,
+              messageType: "file",
+              fileUrl: response.data.filePath,
+            });
+          } else if (selectedChatType === "channel") {
+            socket.emit("send-channel-message", {
+              sender: userInfo.id,
+              content: undefined,
+              messageType: "file",
+              fileUrl: response.data.filePath,
+              channelId: selectedChatData._id,
+            });
+          }
         }
+      }
+    } catch (error) {
+      setIsUploading(false);
+      console.log(error);
+      // Retry logic
+      if (error.response && error.response.status === 500) {
+        const file = e.target.files[0];
+        const chunkSize = 1024 * 1024; // 1MB
+        let offset = 0;
 
+        while (offset < file.size) {
+          const chunk = file.slice(offset, offset + chunkSize);
+          const formData = new FormData();
+          formData.append("chunk", chunk);
+          formData.append("filePath", response.data.filePath);
+
+          await apiClient.post("/resume-upload", formData, {
+            withCredentials: true,
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          });
+
+          offset += chunkSize;
+        }
+      }
+    }
   }
 
 
@@ -123,6 +158,7 @@ const MessageBar = () => {
           placeholder="Enter Message"
           value={message}
             onChange={(e) => setMessage(e.target.value)}
+            onKeyPress={handleKeyPress}
         />
         <button className="text-neutral-500 focus:border-none focus:outline-none focus:text-white duration-300 transition-all"
         onClick={handleAttachementClick}>

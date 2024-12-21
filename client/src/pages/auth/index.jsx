@@ -21,23 +21,23 @@ const Auth = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-    const validatesingup = () => {
-    if (!email) {
-      toast.error("Email is required");
-      return false;
+  //   const validatesingup = () => {
+  //   if (!email) {
+  //     toast.error("Email is required");
+  //     return false;
 
-    } else if (!password) {
-      toast.error("Password is required");
-      return false;
-    } else if (!confirmPassword) {
-      toast.error("Confirm Password is required");
-      return false;
-    } else if (password !== confirmPassword) {  
-      toast.error("Passwords do not match");
-      return false;
-    }
-    return true;
-  };
+  //   } else if (!password) {
+  //     toast.error("Password is required");
+  //     return false;
+  //   } else if (!confirmPassword) {
+  //     toast.error("Confirm Password is required");
+  //     return false;
+  //   } else if (password !== confirmPassword) {  
+  //     toast.error("Passwords do not match");
+  //     return false;
+  //   }
+  //   return true;
+  // };
 
   const validateLogin = () => {
     if (!email) {
@@ -58,29 +58,33 @@ const Auth = () => {
       if(response.data.user.id){
         setUserInfo(response.data.user);
         if(response.data.user.profileSetup){
+          toast.success("Logged in successfully");
           navigate("/profile");
         }else{
           navigate("/chat");
         }
+      }else{
+        toast.error("Invalid credentials");
       }
     }
   }catch(error){
     console.log(error);
+    toast.error(error.response.data);
   };
 
   };
 
-  const handleSingup = async () => {
+//   const handleSingup = async () => {
     
-    if (validatesingup()){
-       const response = await apiClient.post(SIGNUP_ROUTE, { email,password }, { withCredentials: true });
-       if(response.status === 201){
-        setUserInfo(response.data.user);
-         navigate("/profile");
-       }
-    }
+//     if (validatesingup()){
+//        const response = await apiClient.post(SIGNUP_ROUTE, { email,password }, { withCredentials: true });
+//        if(response.status === 201){
+//         setUserInfo(response.data.user);
+//          navigate("/profile");
+//        }
+//     }
 
-};
+// };
 
   return (
     <div className="h-[100vh] w-[100vw] flex items-center justify-center">
@@ -105,12 +109,12 @@ const Auth = () => {
                 >
                   Log In
                 </TabsTrigger>
-                <TabsTrigger
+                {/* <TabsTrigger
                   className="data-[state=active]:bg-transparent text-opacity-90 border-b-2 rounded-none w-full data-[state=active]:text-black data-[state=active]:font-semibold data-[state=active]:border-b-purple-500 p-3 transition-all duration-300"
                   value="Signup"
                 >
                   Sign Up
-                </TabsTrigger>
+                </TabsTrigger> */}
               </TabsList>
               <TabsContent value="Login" className="flex flex-col gap-5 mt-10">
                 <Input
@@ -131,7 +135,7 @@ const Auth = () => {
 
                 <Button className="rounded-full p-6" onClick={handleLogin}>Login</Button>
               </TabsContent>
-              <TabsContent value="Signup" className="flex flex-col gap-5 ">
+              {/* <TabsContent value="Signup" className="flex flex-col gap-5 ">
                 <Input
                   placeholder="UserName"
                   type="email"
@@ -156,7 +160,7 @@ const Auth = () => {
                   onChange={(e) => setConfirmPassword(e.target.value)}
                 />
                 <Button className="rounded-full p-6" onClick={handleSingup}>Signup</Button>
-              </TabsContent>
+              </TabsContent> */}
             </Tabs>
           </div>
         </div>

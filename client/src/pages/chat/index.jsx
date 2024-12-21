@@ -25,7 +25,7 @@ const Chat = () => {
   }, [userInfo, navigate]);
   return (
     <div className="flex h-[100vh] text-white overflow-hidden">
-        {
+        {/* {
             isUploading && (
                     <div className="h-[100vh] w-[100vw] fixed top-0 left-0 bg-black/80 z-[10] flex items-center justify-center flex-col gap-5 backdrop-blur-lg">
                            <h5 className="text-white text-5xl animate-pulse">
@@ -45,7 +45,7 @@ const Chat = () => {
                            {fileDownloadProgress}%
                     </div>
             )
-        }
+        } */}
 
       <ContactsContainer />
       {selectedChatType === undefined ? (

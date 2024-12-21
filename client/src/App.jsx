@@ -7,6 +7,7 @@ import Profile from "./pages/profile";
 import { useAppStore } from "./store";
 import { apiClient } from "./lib/api-client";
 import { GET_USER_INFO } from "./utils/constants";
+import { toast } from "sonner";
 
 const PrivateRoute = ({ children }) => {
   const { userInfo } = useAppStore();
@@ -35,10 +36,10 @@ const App = () => {
             setUserInfo(response.data.user);
           }else{
             setUserInfo(undefined);
+            
           }
         } catch (error) {
           setUserInfo(undefined);
-          console.error(error);
         } finally {
           setLoading(false);
         }

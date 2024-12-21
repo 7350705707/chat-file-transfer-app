@@ -1,4 +1,4 @@
-import { compare } from "bcrypt";
+import { compare, hash } from "bcrypt";
 import User from "../models/UserModel.js";
 import jwt from "jsonwebtoken";
 import {renameSync,unlinkSync} from 'fs';
@@ -51,7 +51,6 @@ export const login = async (req, res, next) => {
     }
     const user = await User.findOne({email});
     if (user) {
-
       const auth = await compare(password, user.password);
       if (!auth) {
         return res.status(400).send("Password is Incorrect");
@@ -177,5 +176,30 @@ export const logout = async (req, res, next) => {
     return res.status(200).send("Logged out successfully");
   } catch (error) {
     return res.status(400).send("Invalid token");
+  }
+};
+
+export const changePassword = async (req, res, next) => {
+  try {
+    const { oldPassword, newPassword } = req.body;
+    if (!oldPassword || !newPassword) {
+      return res.status(400).send("Old password and new password are required");
+    }
+
+    const user = await User.findById(req.userId);
+    if (!user) {
+      return res.status(404).send("User not found");
+    }
+    const auth = await compare(oldPassword, user.password);
+    if (!auth) {
+      return res.status(400).send("Old password is incorrect");
+    }
+    user.password = newPassword;
+    await user.save();
+    res.cookie("jwt", "haresh", { maxAge: 1, SameSite:"lax" });
+    return res.status(200).send("Password changed successfully");
+  } catch (error) {
+    console.log(error);
+    return res.status(500).send("Internal server error");
   }
 };

@@ -20,6 +20,11 @@ const MessageContainer = () => {
     setSelectedChatMessages,
     setIsDownloading,
     setFileDownloadProgress,
+    isUploading,
+    fileUploadProgress,
+    isDownloading,
+    fileDownloadProgress,
+
   } = useAppStore();
 
   const [showImge, setShowImage] = useState(false);
@@ -193,7 +198,7 @@ const MessageContainer = () => {
               message.sender._id === userInfo.id
                 ? "bg-[#8417ff]/5 text-[#8417ff]/90 border-[#8217ff]/50"
                 : "bg-[#2a2b33]/5 text-white/80 border-white/20"
-            } border inline-block p-4 rounded my-1 max-w-[70%] break-words m-9`}
+            } border inline-block p-4 rounded my-1 max-w-[70%] break-words`}
           >
             {message.content}
           </div>
@@ -202,10 +207,10 @@ const MessageContainer = () => {
 {message.messageType === "file" && (
         <div
           className={`${
-            message.sender === userInfo.id
+            message.sender._id === userInfo.id
               ? "bg-[#8417ff]/5 text-[#8417ff]/90 border-[#8217ff]/50"
               : "bg-[#2a2b33]/5 text-white/80 border-white/20"
-          } border inline-block p-4 rounded my-1 w-[400px] h-auto max-w-[70%] break-words `}
+          } border inline-block p-4 rounded my-1 max-w-[70%] break-words`}
         >
           {checkImage(message.fileUrl) ? (
             <div
@@ -272,6 +277,22 @@ const MessageContainer = () => {
   return (
     <div className="flex-1 overflow-y-auto scrollbar-hidden p-4 px-8 md:w-[65vw] lg:w-[70vw] xl:w-[80vw] w-full">
       {renderMesssages()}
+
+      {
+        isUploading && (
+          <div className="fixed top-5 right-100 bg-[#8217ff]/50 text-white p-3 rounded-lg z-[10] flex items-center justify-center">
+            Uploading: {fileUploadProgress}%
+          </div>
+        )
+      }
+
+{
+        isDownloading && (
+          <div className="fixed top-5 right-5 bg-[#8217ff]/50 text-white p-3 rounded-lg z-[10] flex items-center justify-center">
+            Downloading: {fileDownloadProgress}%
+          </div>
+        )
+      }
 
       <div ref={scrollRef}></div>
       {showImge && (
