@@ -1,38 +1,42 @@
-# 3AR Chat Application
+# 3AR Chat Application — Client
 
-A modern real-time chat application built with React, Vite, Socket.IO, and a robust component architecture.
+The React / Vite frontend for the 3AR Chat application.
 
 ## Technologies Used
 
-- **React 18.3** - Frontend library
-- **Vite** - Build tool and development server
-- **Socket.IO** - Real-time communication
-- **Zustand** - State management
-- **TailwindCSS** - Styling with custom theme configuration
-- **Axios** - API requests
-- **Radix UI** - UI component primitives
-- **React Router** - Navigation
+| Technology | Purpose |
+|---|---|
+| React 18.3 + Vite | UI library and build tool |
+| Zustand | Global state management |
+| Socket.IO Client | Real-time bidirectional communication |
+| Axios | HTTP REST requests |
+| TailwindCSS | Utility-first styling |
+| Radix UI / shadcn-ui | Accessible UI component primitives |
+| React Router | Client-side routing |
+| Moment.js | Date / time formatting |
+| emoji-picker-react | In-chat emoji picker |
+| Lucide React | Icon library |
 
 ## Features
 
-- **Authentication** - Login and signup functionality
-- **Real-time Messaging** - Instant message delivery using Socket.IO
-- **Direct Messages** - Private messaging between users
-- **Channels** - Group-based communication
-- **Profile Management** - Update personal information, photos, and passwords
-- **File Sharing** - Upload and download files in conversations
-- **Responsive Design** - Works on both mobile and desktop
+- **Authentication** — Login form with JWT-cookie-based session
+- **Real-time Messaging** — Instant DM and channel message delivery via Socket.IO
+- **Direct Messages** — Private 1-to-1 conversations
+- **Channels** — Group-based messaging with multiple members
+- **Profile Management** — Update name, colour theme, profile picture, and password
+- **File Sharing** — Attach files to any message with upload-progress feedback
+- **Responsive Design** — Adapts to mobile and desktop layouts
 
 ## Project Structure
 
 ```
 client/
-├── public/              # Static assets
-│   └── vite.svg         # Vite logo
+├── public/
+│   └── vite.svg
 ├── src/
-│   ├── assets/          # Images, animations and other assets
-│   ├── components/      # Reusable UI components
-│   │   └── ui/          # Base UI components (shadcn/ui based)
+│   ├── assets/                  # Images, Lottie animations
+│   ├── components/
+│   │   └── ui/                  # Reusable Radix-based primitives
 │   │       ├── avatar.jsx
 │   │       ├── badge.jsx
 │   │       ├── button.jsx
@@ -41,37 +45,98 @@ client/
 │   │       ├── input.jsx
 │   │       ├── multipleselect.jsx
 │   │       ├── scroll-area.jsx
-│   │       ├── sonner.jsx
+│   │       ├── sonner.jsx       # Toast notifications
 │   │       ├── tabs.jsx
 │   │       └── tooltip.jsx
-│   ├── context/         # React contexts
-│   │   └── SocketContext.jsx  # Socket.IO context
-│   ├── lib/             # Utility libraries
-│   │   ├── api-client.js      # Axios instance
-│   │   └── utils.js           # Helper functions
-│   ├── pages/           # Application pages
-│   │   ├── auth/              # Authentication pages
-│   │   ├── chat/             # Chat interface
-│   │   │   └── components/    # Chat-specific components
-│   │   │       └── chat-container/  # Chat container components
-│   │   └── profile/          # User profile management
-│   ├── store/           # Zustand store
-│   │   ├── index.js          # Store setup
-│   │   └── slices/           # Store slices
-│   │       ├── auth-slice.js  # Authentication state
-│   │       └── chat-slice.js  # Chat state
-│   ├── utils/           # Utility functions
-│   │   └── constants.js      # API routes and constants
-│   ├── App.jsx          # Main application component
-│   ├── App.css          # Global styles
-│   ├── main.jsx         # Application entry point
-│   └── index.css        # Global styles and Tailwind directives
-├── components.json      # UI component configuration
-├── eslint.config.js     # ESLint configuration
-├── index.html           # HTML entry point
-├── jsconfig.json        # JavaScript configuration
-├── package.json         # Project dependencies and scripts
-├── postcss.config.js    # PostCSS configuration
-├── tailwind.config.js   # Tailwind CSS configuration
-└── vite.config.js       # Vite configuration
+│   ├── context/
+│   │   └── SocketContext.jsx    # Creates and exposes the Socket.IO instance
+│   ├── lib/
+│   │   ├── api-client.js        # Axios instance (baseURL from VITE_SERVER_HOST)
+│   │   └── utils.js             # cn() helper and colour theme map
+│   ├── store/
+│   │   ├── index.js             # Zustand store combining all slices
+│   │   └── slices/
+│   │       ├── auth-slice.js    # userInfo state
+│   │       └── chat-slice.js    # selectedChat, messages, DM contacts, channels
+│   ├── utils/
+│   │   └── constants.js         # API route string constants
+│   ├── pages/
+│   │   ├── auth/
+│   │   │   └── index.jsx        # Login / signup page
+│   │   ├── profile/
+│   │   │   └── index.jsx        # Profile editor
+│   │   └── chat/
+│   │       ├── index.jsx        # Main three-column chat layout
+│   │       └── components/
+│   │           ├── contacts-container/
+│   │           │   ├── index.jsx          # Sidebar wrapper
+│   │           │   ├── contact-list.jsx   # Renders DM contacts + channels
+│   │           │   └── components/
+│   │           │       ├── new-dm/        # Search and start a new DM
+│   │           │       ├── create-channel/# Create a new channel
+│   │           │       └── profile-info/  # Current user's avatar + logout
+│   │           ├── chat-container/
+│   │           │   ├── index.jsx
+│   │           │   └── components/
+│   │           │       ├── chat-header/       # Contact/channel name + close button
+│   │           │       ├── message-container/ # Scrollable message list
+│   │           │       └── message-bar/       # Text input, emoji picker, file picker
+│   │           └── empty-chat-container/
+│   │               └── index.jsx              # Shown when no chat is selected
+│   ├── App.jsx                  # Route definitions and auth guard
+│   ├── App.css
+│   ├── main.jsx                 # ReactDOM.createRoot entry point
+│   └── index.css                # Tailwind directives + global styles
+├── components.json              # shadcn/ui component configuration
+├── eslint.config.js
+├── index.html
+├── jsconfig.json
+├── package.json
+├── postcss.config.js
+├── tailwind.config.js
+└── vite.config.js
 ```
+
+## State Management
+
+The Zustand store is split into two slices:
+
+**`auth-slice`**
+- `userInfo` — the authenticated user object (or `null`)
+- `setUserInfo(info)` — called after login / profile update
+
+**`chat-slice`**
+- `selectedChatType` — `'contact'` | `'channel'` | `null`
+- `selectedChatData` — the currently open contact or channel object
+- `selectedChatMessages` — messages for the open conversation
+- `directMessagesContacts` — list of DM contacts (sorted by last activity)
+- `channels` — list of channels the user belongs to
+- File upload / download progress counters
+
+## Socket.IO Integration
+
+`SocketContext.jsx` creates a single Socket.IO connection when the user is authenticated and tears it down on logout. It registers two listeners:
+
+| Server event | Action |
+|---|---|
+| `receiveMessage` | Calls `addMessage` and `addContactsInDMContacts` in the store |
+| `receive-channel-message` | Calls `addMessage` and `addChannelInChannelList` in the store |
+
+## Setup
+
+```bash
+cd client
+npm install
+```
+
+Create `client/.env`:
+```env
+VITE_SERVER_HOST=http://localhost:3001
+```
+
+Start the development server:
+```bash
+npm run dev
+```
+
+The app will be available at `http://localhost:5173`.

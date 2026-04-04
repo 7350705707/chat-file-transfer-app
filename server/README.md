@@ -1,177 +1,135 @@
-# 3AR Chat Application
+# 3AR Chat Application — Server
 
-A modern real-time chat application with file transfer capabilities built using MERN stack (MongoDB, Express, React, Node.js) and Socket.IO for real-time communications.
-
-## Project Overview
-
-This project is a full-stack chat application that enables real-time messaging, file sharing, user authentication, and channel management. The application is built with a React frontend and Node.js backend.
+The Node.js / Express backend for the 3AR Chat application. It exposes a REST API and a Socket.IO server for real-time communication.
 
 ## Features
 
-- **User Authentication** - Secure l;\ogin and registration
-- **Real-time Messaging** - Instant message delivery using Socket.IO
-- **Direct Messages** - Private messaging between users
-- **Channels/Group Chats** - Create and manage group conversations
-- **File Sharing** - Upload and download files in conversations
-- **User Profiles** - Manage user information and profile pictures
-- **Responsive Design** - Works across mobile and desktop devices
+- **User Authentication** — Secure login and registration with JWT (HTTP-only cookies)
+- **Real-time Messaging** — Instant message delivery via Socket.IO
+- **Direct Messages** — Private messaging between any two users
+- **Channels / Group Chats** — Create and manage group conversations
+- **File Sharing** — Upload and download files in conversations
+- **User Profiles** — Manage user information and profile pictures
+- **Scheduled Cleanup** — Auto-deletes messages older than 60 days every day at 10 AM
 
 ## Technology Stack
 
-### Frontend
-- React 18.3 with Vite
-- Zustand for state management
-- TailwindCSS for styling
-- Socket.IO client for real-time communication
-- Axios for API requests
-- Radix UI for component primitives
-
-### Backend
-- Node.js with Express
-- Socket.IO for real-time communication
-- MongoDB for data storage
-- JWT for authentication
-- Multer for file uploads
+- **Node.js + Express** — HTTP server and REST API
+- **Socket.IO** — Real-time bidirectional communication
+- **MongoDB + Mongoose** — Database and ODM
+- **JWT (jsonwebtoken)** — Stateless session tokens
+- **bcrypt** — Password hashing
+- **Multer** — File upload handling
+- **node-cron** — Scheduled tasks
+- **cookie-parser / cors** — Cookie parsing and CORS support
 
 ## Project Structure
 
-### Client Structure
-```
-client/
-├── public/              # Static assets
-├── src/
-│   ├── assets/          # Images and other assets
-│   ├── components/      # Reusable UI components
-│   │   └── ui/          # Base UI components
-│   ├── context/         # React contexts
-│   ├── lib/             # Utility libraries
-│   ├── pages/           # Application pages
-│   │   ├── auth/        # Authentication pages
-│   │   ├── chat/        # Chat interface
-│   │   └── profile/     # User profile management
-│   ├── store/           # Zustand store
-│   ├── utils/           # Utility functions
-│   ├── App.jsx          # Main application component
-│   └── main.jsx         # Entry point
-└── config files         # Various configuration files
-```
-
-### Server Structure
 ```
 server/
-├── controllers/         # API route handlers
-│   ├── AuthController.js      # Authentication endpoints
-│   ├── ChannelController.js   # Channel management
-│   ├── ContactsController.js  # Contact management
-│   └── MessagesController.js  # Message handling
-├── middlewares/         # Express middlewares
-│   └── AuthMiddleware.js      # Authentication middleware
-├── models/              # Database models
-│   ├── ChannelModel.js       # Channel data model
-│   ├── MessagesModel.js      # Messages data model
-│   └── UserModel.js          # User data model
-├── routes/              # API routes
-│   ├── AuthRoutes.js         # Authentication routes
-│   ├── ChannelRoutes.js      # Channel routes
-│   ├── ContactRoutes.js      # Contact routes
-│   └── MessagesRoutes.js     # Message routes
-├── uploads/             # File uploads
-│   ├── files/                # Shared files
-│   └── profiles/             # Profile pictures
-├── index.js             # Server entry point
-├── socket.js            # Socket.IO configuration
-└── package.json         # Server dependencies
+├── controllers/
+│   ├── AuthController.js        # signup, login, profile, password, logout
+│   ├── ChannelController.js     # create channel, list channels, get messages
+│   ├── ContactsController.js    # search contacts, DM contact list, all users
+│   └── MessagesController.js    # DM history, file uploads, message cleanup
+├── middlewares/
+│   └── AuthMiddleware.js        # JWT cookie verification (verifyToken)
+├── models/
+│   ├── UserModel.js             # User schema: email, password (hashed), profile
+│   ├── ChannelModel.js          # Channel schema: name, admin, members[], messages[]
+│   └── MessagesModel.js         # Message schema: sender, recipient, content, fileUrl
+├── routes/
+│   ├── AuthRoutes.js            # /api/auth/*
+│   ├── ChannelRoutes.js         # /api/channel/*
+│   ├── ContactRoutes.js         # /api/contacts/*
+│   └── MessagesRoutes.js        # /api/messages/*
+├── uploads/
+│   ├── files/                   # Files shared in conversations
+│   └── profiles/                # Profile pictures
+├── index.js                     # App bootstrap, middleware, route mounting, DB connection
+├── socket.js                    # Socket.IO setup and event handlers
+└── package.json
 ```
 
-## Installation & Setup
+## Setup
 
 ### Prerequisites
-- Node.js (v16 or newer)
-- MongoDB
-- npm or yarn
+- Node.js v16 or newer
+- A running MongoDB instance
 
-### Backend Setup
-1. Navigate to the server directory:
-   ```powershell
-   cd server
-   ```
+### Installation
 
-2. Install dependencies:
-   ```powershell
-   npm install
-   ```
+```bash
+cd server
+npm install
+```
 
-3. Create a `.env` file with the following variables:
-   ```
-   PORT=3001
-   MONGO_URI=mongodb://localhost:27017/3archat
-   JWT_SECRET=your_jwt_secret
-   ```
+### Environment Variables
 
-4. Start the server:
-   ```powershell
-   npm start
-   ```
+Create a `.env` file in `server/` with:
 
-### Frontend Setup
-1. Navigate to the client directory:
-   ```powershell
-   cd client
-   ```
+```env
+PORT=3001
+DATABASE_URL=mongodb://localhost:27017/3archat
+JWT_KEY=your_jwt_secret_here
+ORIGIN=http://localhost:5173
+# Optional: additional allowed origins for local network access
+LAN=http://192.168.x.x:5173
+WIFI=http://10.x.x.x:5173
+```
 
-2. Install dependencies:
-   ```powershell
-   npm install
-   ```
+### Start the Server
 
-3. Create a `.env` file with:
-   ```
-   VITE_SERVER_HOST=http://localhost:3001
-   ```
-
-4. Start the development server:
-   ```powershell
-   npm run dev
-   ```
+```bash
+npm start
+```
 
 ## API Endpoints
 
-### Authentication
-- `POST /api/auth/register` - Register a new user
-- `POST /api/auth/login` - Login existing user
-- `GET /api/auth/me` - Get current user info
+### Authentication — `/api/auth`
+| Method | Path | Auth | Description |
+|--------|------|:---:|---|
+| POST | `/signup` | — | Create a new user account |
+| POST | `/login` | — | Authenticate and receive a JWT cookie |
+| GET | `/user-info` | ✓ | Get the current user's profile |
+| POST | `/update-profile` | ✓ | Update display name and colour |
+| POST | `/add-profile-image` | ✓ | Upload a profile picture |
+| DELETE | `/delete-profile-image` | ✓ | Remove the current profile picture |
+| POST | `/change-password` | ✓ | Change the account password |
+| POST | `/logout` | ✓ | Clear the JWT cookie |
 
-### Messages
-- `GET /api/messages/:channelId` - Get messages in a channel
-- `POST /api/messages/:channelId` - Send a message to a channel
-- `POST /api/messages/upload/:channelId` - Upload a file to a channel
+### Contacts — `/api/contacts`
+| Method | Path | Auth | Description |
+|--------|------|:---:|---|
+| POST | `/search` | ✓ | Search users by name or email |
+| GET | `/get-contacts-for-dm` | ✓ | List DM contacts (from message history) |
+| GET | `/get-all-contacts` | ✓ | List all users (for channel creation) |
 
-### Channels
-- `GET /api/channels` - Get all channels for a user
-- `POST /api/channels` - Create a new channel
-- `GET /api/channels/:channelId` - Get channel details
-- `PUT /api/channels/:channelId` - Update a channel
-- `DELETE /api/channels/:channelId` - Delete a channel
+### Messages — `/api/messages`
+| Method | Path | Auth | Description |
+|--------|------|:---:|---|
+| POST | `/get-messages` | ✓ | Get DM history between two users |
+| POST | `/upload-file` | ✓ | Upload an attachment; returns `filePath` |
 
-### Contacts
-- `GET /api/contacts` - Get user contacts
-- `POST /api/contacts` - Add a contact
-- `DELETE /api/contacts/:contactId` - Remove a contact
+### Channels — `/api/channel`
+| Method | Path | Auth | Description |
+|--------|------|:---:|---|
+| POST | `/create-channel` | ✓ | Create a channel with a name and member list |
+| GET | `/get-user-channels` | ✓ | List channels where the user is a member or admin |
+| GET | `/get-channel-messages/:channelId` | ✓ | Get all messages in a channel |
 
 ## Socket.IO Events
 
-- `connection` - User connects
-- `disconnect` - User disconnects
-- `join-room` - Join a chat room/channel
-- `leave-room` - Leave a chat room/channel
-- `message` - New message event
-- `typing` - User typing indicator
-- `stop-typing` - User stopped typing
+The client connects with `userId` in the query string so the server can map users to socket IDs.
 
-## License
+### Client → Server
+| Event | Payload | Description |
+|---|---|---|
+| `sendMessage` | `{ sender, recipient, content, messageType, fileUrl }` | Send a direct message |
+| `send-channel-message` | `{ sender, channelId, content, messageType, fileUrl }` | Broadcast a message to a channel |
 
-[MIT License](LICENSE)
-
-## Contact
-
-For any questions or support, please contact the repository maintainers.
+### Server → Client
+| Event | Payload | Description |
+|---|---|---|
+| `receiveMessage` | Populated `Message` document | Sent to both the sender and the recipient |
+| `receive-channel-message` | Populated `Message` doc + `channelId` | Sent to every channel member and the admin |
